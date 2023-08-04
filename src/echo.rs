@@ -1,4 +1,3 @@
-// use std::env;
 pub fn echo(args: &Vec<String>) {
     if args[2].contains('-') {
         let short_op = &args[2];
