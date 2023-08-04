@@ -1,5 +1,5 @@
 // use std::env;
-pub fn echo(args: &Vec<String>){
+pub fn echo(args: &Vec<String>) {
     if args[2].contains('-') {
         let short_op = &args[2];
         let my_args = &args[3..].to_owned();
@@ -11,18 +11,22 @@ pub fn echo(args: &Vec<String>){
         }
         if short_op == "-e" {
             let sub = my_args.join(" ");
-            let sub_vec = sub.split("\\n").collect::<Vec<_>>();
-            for s in sub_vec {
-                let s = s.replace("\\t", "\t");
-                let s = s.replace("\\b", "\x08");
-                let s = s.replace("\\v", "\x0B");
-                if s.contains("\\c") {
-                    let s = s.split("\\c").take(1).collect::<String>();
-                    print!("{}", s);
-                    return;
-                }
-                println!("{}", s);
+
+            let s = sub.replace("\\t", "\t");
+            let s = s.replace("\\b", "\x08");
+            let s = s.replace("\\v", "\x0B");
+            let s = s.replace("\\n", "\n");
+            if s.contains("\\c") {
+                let s = s.split("\\c").take(1).collect::<String>();
+                print!("{}", s);
+                return;
             }
+            if s.contains("\\r") {
+                let s = s.split("\\r").collect::<Vec<_>>();
+                println!("{}", s[1]);
+                return;
+            }
+            println!("{}", s);
             return;
         }
     }
