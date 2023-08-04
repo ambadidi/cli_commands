@@ -1,5 +1,7 @@
 mod echo;
+mod cat;
 use echo::*;
+use cat::*;
 use std::env;
 
 fn main() {
@@ -7,5 +9,8 @@ fn main() {
     let cmd = &arguments[1];
     if cmd == "echo" {
         echo(&arguments);
+    }
+    if cmd == "cat" {
+        cat(&arguments);
     }
 }
