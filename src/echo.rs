@@ -29,6 +29,13 @@ pub fn echo(args: &Vec<String>) {
             println!("{}", s);
             return;
         }
+        if short_op == "-E" {
+            for arg in my_args {
+                print!("{arg} ");
+            }
+            println!();
+            return;
+        }
     }
     let my_args = &args[2..].to_owned();
     for arg in my_args {
