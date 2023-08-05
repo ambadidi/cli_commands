@@ -1,6 +1,18 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 pub fn cat(args: &Vec<String>){
+    if args.len() == 2 {
+        loop {
+            let mut input = String::new();
+            match io::stdin().read_line(&mut input) {
+                Ok(_) => {
+                    let trimmed_input = input.trim();
+                    println!("{}", trimmed_input);
+                }
+                Err(error) => println!("Error reading input: {}", error),
+            }
+        }
+    }
     if args[2] == "-n" {
         let my_files = &args[3..].to_owned();
         for my_file in my_files {
@@ -43,8 +55,6 @@ pub fn cat(args: &Vec<String>){
         }
         return;
     }
-
-
 
     let my_files = &args[2..].to_owned();
     for my_file in my_files {
