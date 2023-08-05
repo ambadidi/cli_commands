@@ -1,7 +1,9 @@
 mod echo;
 mod cat;
+mod ls;
 use echo::*;
 use cat::*;
+use ls::*;
 use std::env;
 
 fn main() {
@@ -12,5 +14,8 @@ fn main() {
     }
     if cmd == "cat" {
         cat(&arguments);
+    }
+    if cmd == "ls" {
+        ls(&arguments);
     }
 }
