@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{self, BufRead};
-pub fn cat(args: &Vec<String>){
+pub fn cat(args: &Vec<String>) {
     if args.len() == 2 {
         loop {
             let mut input = String::new();
@@ -20,7 +20,7 @@ pub fn cat(args: &Vec<String>){
             let reader = io::BufReader::new(file);
             for (i, line_result) in reader.lines().enumerate() {
                 let line = line_result.expect("failed to read line");
-                println!("     {}  {}", i+1, line);
+                println!("     {}  {}", i + 1, line);
             }
         }
         return;
@@ -32,7 +32,7 @@ pub fn cat(args: &Vec<String>){
             let reader = io::BufReader::new(file);
             for line_result in reader.lines() {
                 let line = line_result.expect("failed to read line");
-                println!("{}$",line);
+                println!("{}$", line);
             }
         }
         return;
