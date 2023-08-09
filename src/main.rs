@@ -1,8 +1,8 @@
-mod echo;
 mod cat;
+mod echo;
 mod ls;
-use echo::*;
 use cat::*;
+use echo::*;
 use ls::*;
 use std::env;
 
