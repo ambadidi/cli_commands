@@ -41,13 +41,7 @@ pub fn ls(args: &Vec<String>) {
             if b_str.starts_with(".") && b_str.len() >= 2 {
                 b_str = &b_str[1..];
             }
-            if a_str.starts_with(".") && !b_str.starts_with(".") {
-                return std::cmp::Ordering::Less;
-            } else if !a_str.starts_with(".") && b_str.starts_with(".") {
-                return std::cmp::Ordering::Greater;
-            } else {
-                return a_str.cmp(b_str);
-            }
+            a_str.cmp(b_str)
         });
         for i in 0..entries.len() {
             for j in 0..entries.len() - i - 1 {
