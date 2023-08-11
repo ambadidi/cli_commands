@@ -1,8 +1,9 @@
 use std::fs;
 use std::path::PathBuf;
 use std::os::unix::fs::MetadataExt;
-use std::os::unix::fs::PermissionsExt;
 use chrono::prelude::*;
+use file_owner::PathExt;
+use file_mode::ModePath;
 
 pub fn ls(args: &Vec<String>) {
     if args.len() == 2 {
@@ -83,6 +84,8 @@ pub fn ls(args: &Vec<String>) {
             .collect::<Result<Vec<_>, _>>()
             .unwrap();
         sort_non_hidden(&mut entries);
+        let total_blocks = get_total_blocks(&entries);
+        println!("total {total_blocks}");
         for entry in entries {
             let bold = "\x1b[1m";
             let blue = "\x1b[34m";
@@ -96,14 +99,17 @@ pub fn ls(args: &Vec<String>) {
             if &file_name[0..1] == "." {
                 continue;
             }
+            let mode = entry.mode().unwrap().to_string();
             let file_size = entry.metadata().map(|m| m.len()).expect("problem with file_size metadata");
             let n_hard_link = entry.metadata().map(|m| m.nlink()).unwrap();
             let modif_time = entry.metadata().map(|m| m.mtime()).unwrap();
-            let modif_time_s = convert_ts(modif_time);
+            let (month, day, hour_minutes) = convert_ts(modif_time);
+            let owner_name = entry.owner().map(|o| o.name().unwrap()).unwrap().unwrap();
+            let group_name = entry.group().map(|o| o.name().unwrap()).unwrap().unwrap();
             if entry.is_dir() {
-                println!("{} {:>5} {} {:>2} {} {}{}{}{}", n_hard_link, file_size, modif_time_s.0, modif_time_s.1, modif_time_s.2, bold, blue, file_name, reset);
+                println!("{mode} {n_hard_link} {owner_name} {group_name} {file_size:>5} {month} {day:>2} {hour_minutes} {bold}{blue}{file_name}{reset}");
             } else {
-                println!("{} {:>5} {} {:>2} {} {}{}", n_hard_link, file_size, modif_time_s.0, modif_time_s.1,modif_time_s.2, file_name, reset);
+                println!("{mode} {n_hard_link} {owner_name} {group_name} {file_size:>5} {month} {day:>2} {hour_minutes} {file_name}{reset}");
             }
         }
     }
@@ -154,4 +160,13 @@ fn convert_ts(ts: i64) -> (String, String, String) {
     let day = dt.format("%-d");
     let month = dt.format("%b");
     (month.to_string(), day.to_string(), hour_minutes.to_string())
+}
+fn get_total_blocks(entries: &Vec<PathBuf>) -> u64 {
+    let mut total_size = 0;
+    for entry in entries {
+        let metadata = entry.metadata().unwrap();
+        total_size += metadata.len();
+    }
+    let block_size = 4096;
+    (total_size + block_size - 1) / block_size
 }
