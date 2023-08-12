@@ -1,11 +1,18 @@
-use std::fs;
-use std::path::PathBuf;
-use std::os::unix::fs::MetadataExt;
 use chrono::prelude::*;
-use file_owner::PathExt;
 use file_mode::ModePath;
+use file_owner::PathExt;
+use std::fs;
+use std::os::unix::fs::MetadataExt;
+use std::path::PathBuf;
 
 pub fn ls(args: &Vec<String>) {
+    let bold = "\x1b[1m";
+    let blue = "\x1b[34m";
+    let reset = "\x1b[0m";
+    let paths = args
+        .into_iter()
+        .map(PathBuf::from)
+        .collect::<Vec<PathBuf>>();
     if args.len() == 2 {
         let mut entries: Vec<PathBuf> = fs::read_dir(".")
             .unwrap()
@@ -14,9 +21,9 @@ pub fn ls(args: &Vec<String>) {
             .unwrap();
         sort_non_hidden(&mut entries);
         for entry in entries {
-            let bold = "\x1b[1m";
-            let blue = "\x1b[34m";
-            let reset = "\x1b[0m";
+            // let bold = "\x1b[1m";
+            // let blue = "\x1b[34m";
+            // let reset = "\x1b[0m";
             let file_name = entry
                 .components()
                 .last()
@@ -59,9 +66,9 @@ pub fn ls(args: &Vec<String>) {
             }
         }
         for entry in entries {
-            let bold = "\x1b[1m";
-            let blue = "\x1b[34m";
-            let reset = "\x1b[0m";
+            // let bold = "\x1b[1m";
+            // let blue = "\x1b[34m";
+            // let reset = "\x1b[0m";
             let file_name = entry
                 .components()
                 .last()
@@ -84,12 +91,12 @@ pub fn ls(args: &Vec<String>) {
             .collect::<Result<Vec<_>, _>>()
             .unwrap();
         sort_non_hidden(&mut entries);
-        let total_blocks = get_total_blocks(&entries);
-        println!("total {total_blocks}");
+        // let total_blocks = get_total_blocks(&entries);
+        // println!("total {total_blocks}");
         for entry in entries {
-            let bold = "\x1b[1m";
-            let blue = "\x1b[34m";
-            let reset = "\x1b[0m";
+            // let bold = "\x1b[1m";
+            // let blue = "\x1b[34m";
+            // let reset = "\x1b[0m";
             let file_name = entry
                 .components()
                 .last()
@@ -100,7 +107,10 @@ pub fn ls(args: &Vec<String>) {
                 continue;
             }
             let mode = entry.mode().unwrap().to_string();
-            let file_size = entry.metadata().map(|m| m.len()).expect("problem with file_size metadata");
+            let file_size = entry
+                .metadata()
+                .map(|m| m.len())
+                .expect("problem with file_size metadata");
             let n_hard_link = entry.metadata().map(|m| m.nlink()).unwrap();
             let modif_time = entry.metadata().map(|m| m.mtime()).unwrap();
             let (month, day, hour_minutes) = convert_ts(modif_time);
@@ -112,6 +122,32 @@ pub fn ls(args: &Vec<String>) {
                 println!("{mode} {n_hard_link} {owner_name} {group_name} {file_size:>5} {month} {day:>2} {hour_minutes} {file_name}{reset}");
             }
         }
+    }
+    if args.len() == 3 {
+        let path = paths.last().unwrap();
+            if path.is_dir() {
+                let mut entries = fs::read_dir(path).unwrap().map(|res| res.map(|e| e.path())).collect::<Result<Vec<_>, _>>().unwrap();
+                sort_non_hidden(&mut entries);
+                for entry in entries {
+                    let file_name = entry
+                        .components()
+                        .last()
+                        .unwrap()
+                        .as_os_str()
+                        .to_string_lossy();
+                    if &file_name[0..1] == "." {
+                        continue;
+                    }
+                    if entry.is_dir() {
+                        print!("{}{}{}{}  ", bold, blue, file_name, reset);
+                    } else {
+                        print!("{}{}  ", file_name, reset);
+                    }
+                }
+                println!();
+            } else if path.is_file() {
+                println!("{}", path.components().last().unwrap().as_os_str().to_string_lossy());
+            }
     }
 }
 fn sort_non_hidden(entries: &mut Vec<PathBuf>) {
@@ -161,12 +197,23 @@ fn convert_ts(ts: i64) -> (String, String, String) {
     let month = dt.format("%b");
     (month.to_string(), day.to_string(), hour_minutes.to_string())
 }
-fn get_total_blocks(entries: &Vec<PathBuf>) -> u64 {
-    let mut total_size = 0;
-    for entry in entries {
-        let metadata = entry.metadata().unwrap();
-        total_size += metadata.len();
-    }
-    let block_size = 4096;
-    (total_size + block_size - 1) / block_size
-}
+// fn get_total_blocks(entries: &Vec<PathBuf>) -> u64 {
+//     let mut total_size = 0;
+//     for entry in entries {
+//         let file_name = entry
+//                 .components()
+//                 .last()
+//                 .unwrap()
+//                 .as_os_str()
+//                 .to_string_lossy();
+//             if &file_name[0..1] == "." {
+//                 continue;
+//             }
+//             println!("{entry:?}");
+//         let metadata = entry.metadata().unwrap();
+//         total_size += metadata.blocks();
+//     }
+//     // let block_size = 1024;
+//     // (total_size + block_size - 1) / block_size
+//     total_size
+// }
