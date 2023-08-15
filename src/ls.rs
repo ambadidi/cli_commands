@@ -125,29 +125,40 @@ pub fn ls(args: &Vec<String>) {
     }
     if args.len() == 3 {
         let path = paths.last().unwrap();
-            if path.is_dir() {
-                let mut entries = fs::read_dir(path).unwrap().map(|res| res.map(|e| e.path())).collect::<Result<Vec<_>, _>>().unwrap();
-                sort_non_hidden(&mut entries);
-                for entry in entries {
-                    let file_name = entry
-                        .components()
-                        .last()
-                        .unwrap()
-                        .as_os_str()
-                        .to_string_lossy();
-                    if &file_name[0..1] == "." {
-                        continue;
-                    }
-                    if entry.is_dir() {
-                        print!("{}{}{}{}  ", bold, blue, file_name, reset);
-                    } else {
-                        print!("{}{}  ", file_name, reset);
-                    }
+        if path.is_dir() {
+            let mut entries = fs::read_dir(path)
+                .unwrap()
+                .map(|res| res.map(|e| e.path()))
+                .collect::<Result<Vec<_>, _>>()
+                .unwrap();
+            sort_non_hidden(&mut entries);
+            for entry in entries {
+                let file_name = entry
+                    .components()
+                    .last()
+                    .unwrap()
+                    .as_os_str()
+                    .to_string_lossy();
+                if &file_name[0..1] == "." {
+                    continue;
                 }
-                println!();
-            } else if path.is_file() {
-                println!("{}", path.components().last().unwrap().as_os_str().to_string_lossy());
+                if entry.is_dir() {
+                    print!("{}{}{}{}  ", bold, blue, file_name, reset);
+                } else {
+                    print!("{}{}  ", file_name, reset);
+                }
             }
+            println!();
+        } else if path.is_file() {
+            println!(
+                "{}",
+                path.components()
+                    .last()
+                    .unwrap()
+                    .as_os_str()
+                    .to_string_lossy()
+            );
+        }
     }
 }
 fn sort_non_hidden(entries: &mut Vec<PathBuf>) {
