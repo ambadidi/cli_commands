@@ -1,10 +1,12 @@
 mod cat;
 mod echo;
 mod ls;
+mod wc;
 use cat::*;
 use echo::*;
 use ls::*;
 use std::env;
+use wc::*;
 
 fn main() {
     let arguments: Vec<String> = env::args().collect();
@@ -17,5 +19,8 @@ fn main() {
     }
     if cmd == "ls" {
         ls(&arguments);
+    }
+    if cmd == "wc" {
+        wc(&arguments);
     }
 }
